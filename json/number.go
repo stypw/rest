@@ -11,5 +11,5 @@ func Number(v float64) *Number_T {
 }
 
 func (v *Number_T) ToString() string {
-	return fmt.Sprintf("%f", float64(v.Value))
+	return fmt.Sprintf("%g", v.Value)
 }
