@@ -9,16 +9,12 @@ import (
 
 type Object map[string]Value
 
-func (v Object) toString() string {
+func (v Object) ToString() string {
 	var vals []string
 	for k, val := range v {
-		vals = append(vals, fmt.Sprintf(`"%s":%s`, k, val.toString()))
+		vals = append(vals, fmt.Sprintf(`"%s":%s`, k, val.ToString()))
 	}
 	return fmt.Sprintf(`{%s}`, strings.Join(vals, ","))
-}
-
-func (v Object) ToString() string {
-	return v.toString()
 }
 
 func (v Object) parse(dec *json.Decoder) error {

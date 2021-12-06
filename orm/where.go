@@ -6,18 +6,8 @@ import (
 	"strings"
 )
 
-type jsonBoolean bool
-
-func (b jsonBoolean) toByte() byte {
-	if b {
-		return 1
-	} else {
-		return 0
-	}
-}
-
-/**
-
+/**********************************************************
+$or,,$like,,$gt,,$gte,,$lt,,$lte,,$is,,$not,,$in,,$notin
 {
 	name:{$like:"l"},
 	age:{$gt:20},
@@ -28,18 +18,17 @@ func (b jsonBoolean) toByte() byte {
 	],
 	class:{$in:[12,13,14]}
 }
-$or,
-$like,
-$gt,
-$gte,
-$lt,
-$lte,
-$is,
-$not,
-$in,
-$notin
+**********************************************************/
 
-*/
+type jsonBoolean bool
+
+func (b jsonBoolean) toByte() byte {
+	if b {
+		return 1
+	} else {
+		return 0
+	}
+}
 
 func GetJsonValue(v JSON.Value) interface{} {
 	switch vv := v.(type) {
@@ -216,8 +205,4 @@ func parseAnd(where JSON.Object) (string, []interface{}, error) {
 
 	}
 	return strings.Join(ands, " and "), params, nil
-}
-
-func Parse(where JSON.Object) (string, []interface{}, error) {
-	return parseAnd(where)
 }

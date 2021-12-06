@@ -9,10 +9,10 @@ import (
 
 type Array []Value
 
-func (v Array) toString() string {
+func (v Array) ToString() string {
 	var vals []string
 	for _, val := range v {
-		vals = append(vals, val.toString())
+		vals = append(vals, val.ToString())
 	}
 	return fmt.Sprintf(`[%s]`, strings.Join(vals, ","))
 }

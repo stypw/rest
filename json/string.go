@@ -7,7 +7,7 @@ type String_T struct{ Value string }
 func String(v string) *String_T {
 	return &String_T{Value: v}
 }
-func (v *String_T) toString() string {
+func (v *String_T) ToString() string {
 	return fmt.Sprintf("\"%s\"", v.Value)
 }
 
