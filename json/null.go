@@ -1,10 +1,7 @@
 package JSON
 
-type Null_T struct{}
+type Null struct{}
 
-func Null() *Null_T {
-	return &Null_T{}
-}
-func (v *Null_T) ToString() string {
+func (v Null) ToString() string {
 	return "null"
 }

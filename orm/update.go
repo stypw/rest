@@ -14,25 +14,25 @@ func parseSet(item JSON.Object) ([]string, []interface{}, error) {
 
 	for key, child := range item {
 		switch ch := child.(type) {
-		case *JSON.Null_T:
+		case *JSON.Null:
 			{
 				sets = append(sets, fmt.Sprintf("%s = ?"), key)
 				values = append(values, nil)
 			}
-		case *JSON.Number_T:
+		case *JSON.Number:
 			{
 				sets = append(sets, fmt.Sprintf("%s = ?"), key)
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
-		case *JSON.String_T:
+		case *JSON.String:
 			{
 				sets = append(sets, fmt.Sprintf("%s = ?"), key)
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
-		case *JSON.Boolean_T:
+		case *JSON.Boolean:
 			{
 				sets = append(sets, fmt.Sprintf("%s = ?"), key)
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
 		default:
 			return nil, nil, errors.New("unknowed data type")
@@ -41,7 +41,7 @@ func parseSet(item JSON.Object) ([]string, []interface{}, error) {
 	return sets, values, nil
 }
 
-func (orm *Orm) Update(where JSON.Object, data JSON.Object) (*JSON.Number_T, error) {
+func (orm *Orm) Update(where JSON.Object, data JSON.Object) (JSON.Number, error) {
 
 	w, vs, err := parseAnd(where)
 	if err != nil {

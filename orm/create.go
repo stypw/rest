@@ -15,29 +15,29 @@ func parseCreate(item JSON.Object) ([]string, []string, []interface{}, error) {
 
 	for key, child := range item {
 		switch ch := child.(type) {
-		case *JSON.Null_T:
+		case JSON.Null:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
 				values = append(values, nil)
 			}
-		case *JSON.Number_T:
+		case JSON.Number:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
-		case *JSON.String_T:
+		case JSON.String:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
-		case *JSON.Boolean_T:
+		case JSON.Boolean:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
-				values = append(values, ch.Value)
+				values = append(values, ch)
 			}
 		default:
 			return nil, nil, nil, errors.New("unknowed data type")
@@ -46,7 +46,7 @@ func parseCreate(item JSON.Object) ([]string, []string, []interface{}, error) {
 	return fields, marks, values, nil
 }
 
-func (orm *Orm) Create(item JSON.Object) (*JSON.Number_T, error) {
+func (orm *Orm) Create(item JSON.Object) (JSON.Number, error) {
 	if item == nil {
 		return JSON.Number(0), errors.New("item data can not empty")
 	}

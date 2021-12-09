@@ -32,14 +32,14 @@ func (b jsonBoolean) toByte() byte {
 
 func GetJsonValue(v JSON.Value) interface{} {
 	switch vv := v.(type) {
-	case *JSON.Null_T:
+	case JSON.Null:
 		return nil
-	case *JSON.Number_T:
-		return vv.Value
-	case *JSON.String_T:
-		return vv.Value
-	case *JSON.Boolean_T:
-		return vv.Value
+	case JSON.Number:
+		return vv
+	case JSON.String:
+		return vv
+	case JSON.Boolean:
+		return vv
 	default:
 		return nil
 	}
@@ -185,15 +185,15 @@ func parseAnd(where JSON.Object) (string, []interface{}, error) {
 		}
 
 		switch val := v.(type) {
-		case *JSON.Number_T:
+		case JSON.Number:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, val.Value)
-		case *JSON.String_T:
+			params = append(params, val)
+		case JSON.String:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, val.Value)
-		case *JSON.Boolean_T:
+			params = append(params, val)
+		case JSON.Boolean:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, jsonBoolean(val.Value).toByte())
+			params = append(params, jsonBoolean(val).toByte())
 		case JSON.Object:
 			if express, ps, err := parseObject(val); err == nil {
 				ands = append(ands, fmt.Sprintf("%s %s", k, express))

@@ -22,6 +22,6 @@ func TestJson(t *testing.T) {
 
 	fmt.Println(tst)
 
-	s, _ := AsString(tst)
+	s := GetString(tst)
 	fmt.Println(s)
 }

@@ -10,16 +10,16 @@ func (r *Router) page(w http.ResponseWriter, req *http.Request) (int, JSON.Value
 
 	body, err := JSON.FromStream(req.Body)
 	if err != nil {
-		return 1, JSON.Null(), errors.New("where can not be empty")
+		return 1, JSON.Null{}, errors.New("where can not be empty")
 	}
 	where, y := body["where"]
 	if !y {
-		return 1, JSON.Null(), errors.New("where can not be empty")
+		return 1, JSON.Null{}, errors.New("where can not be empty")
 	}
 
 	whereObj, y := where.(JSON.Object)
 	if !y {
-		return 1, JSON.Null(), errors.New("where can not be empty")
+		return 1, JSON.Null{}, errors.New("where can not be empty")
 	}
 	var oo JSON.Object = nil
 	order, y := body["order"]
@@ -34,17 +34,17 @@ func (r *Router) page(w http.ResponseWriter, req *http.Request) (int, JSON.Value
 	size := 10
 	p, y := body["page"]
 	if y {
-		po, y := p.(*JSON.Number_T)
+		po, y := p.(JSON.Number)
 		if y {
-			page = int(po.Value)
+			page = int(po)
 		}
 	}
 
 	s, y := body["size"]
 	if y {
-		sz, y := s.(*JSON.Number_T)
+		sz, y := s.(JSON.Number)
 		if y {
-			size = int(sz.Value)
+			size = int(sz)
 		}
 	}
 
@@ -57,7 +57,7 @@ func (r *Router) page(w http.ResponseWriter, req *http.Request) (int, JSON.Value
 
 	array, err := r.orm.Page(whereObj, oo, page, size)
 	if err != nil {
-		return 1, JSON.Null(), err
+		return 1, JSON.Null{}, err
 	}
 	return 0, array, nil
 

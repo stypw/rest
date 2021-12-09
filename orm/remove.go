@@ -6,7 +6,7 @@ import (
 	JSON "rest/json"
 )
 
-func (orm *Orm) Remove(where JSON.Object) (*JSON.Number_T, error) {
+func (orm *Orm) Remove(where JSON.Object) (JSON.Number, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
 		return JSON.Number(0), err

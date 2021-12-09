@@ -17,9 +17,9 @@ func parseOrder(order JSON.Value) (string, error) {
 		{
 			for key, child := range vd {
 				switch ch := child.(type) {
-				case *JSON.String_T:
+				case JSON.String:
 					{
-						var od = strings.ToLower(strings.Trim(ch.Value, ""))
+						var od = strings.ToLower(strings.Trim(string(ch), ""))
 						if od == "asc" || od == "desc" {
 							orders = append(orders, fmt.Sprintf("%s %s", key, od))
 							orders = append(orders, fmt.Sprintf("%s %s", key, od))
@@ -28,18 +28,18 @@ func parseOrder(order JSON.Value) (string, error) {
 							return "", errors.New("order fmt error")
 						}
 					}
-				case *JSON.Number_T:
+				case JSON.Number:
 					{
-						if ch.Value > 0 {
+						if ch > 0 {
 							orders = append(orders, key+" asc")
 						} else {
 							orders = append(orders, key+" desc")
 						}
 
 					}
-				case *JSON.Boolean_T:
+				case JSON.Boolean:
 					{
-						if ch.Value {
+						if ch {
 							orders = append(orders, key+" asc")
 						} else {
 							orders = append(orders, key+" desc")
@@ -51,14 +51,14 @@ func parseOrder(order JSON.Value) (string, error) {
 	case JSON.Array:
 		{
 			for _, item := range vd {
-				if i, y := item.(*JSON.String_T); !y {
+				if i, y := item.(JSON.String); !y {
 					return "", errors.New("order fmt error")
 				} else {
-					orders = append(orders, i.Value)
+					orders = append(orders, string(i))
 				}
 			}
 		}
-	case *JSON.Null_T:
+	case JSON.Null:
 		{
 			return "", nil
 		}

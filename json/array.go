@@ -17,6 +17,32 @@ func (v Array) ToString() string {
 	return fmt.Sprintf(`[%s]`, strings.Join(vals, ","))
 }
 
+func GetItem(v Value, i int) Value {
+	if v == nil || i < 0 {
+		return nil
+	}
+	if a, y := v.(Array); y {
+		if i >= len(a) {
+			return nil
+		}
+		return a[i]
+	}
+	return nil
+}
+
+func TryGetItem(v Value, i int) (Value, bool) {
+	if v == nil || i < 0 {
+		return nil, false
+	}
+	if a, y := v.(Array); y {
+		if i >= len(a) {
+			return nil, false
+		}
+		return a[i], true
+	}
+	return nil, false
+}
+
 func (v *Array) parse(dec *json.Decoder) error {
 	var err error
 	var interator = tokenIterator{
@@ -34,7 +60,7 @@ func (v *Array) parse(dec *json.Decoder) error {
 			return true
 		},
 		nullHandle: func() bool {
-			*v = append(*v, Null())
+			*v = append(*v, Null{})
 			return true
 		},
 		objectStartHandle: func() bool {

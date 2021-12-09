@@ -17,6 +17,26 @@ func (v Object) ToString() string {
 	return fmt.Sprintf(`{%s}`, strings.Join(vals, ","))
 }
 
+func GetProperty(v Value, k string) Value {
+	if v == nil || k == "" {
+		return nil
+	}
+	if o, y := v.(Object); y {
+		return o[k]
+	}
+	return nil
+}
+
+func TryGetProperty(v Value, k string) (Value, bool) {
+	if v == nil || k == "" {
+		return nil, false
+	}
+	if o, y := v.(Object); y {
+		return o[k], true
+	}
+	return nil, false
+}
+
 func (v Object) parse(dec *json.Decoder) error {
 	var currKey string
 	var err error
@@ -57,7 +77,7 @@ func (v Object) parse(dec *json.Decoder) error {
 				err = errors.New("json fmt error")
 				return false
 			} else {
-				v[currKey] = Null()
+				v[currKey] = Null{}
 				currKey = ""
 				return true
 			}

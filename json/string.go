@@ -2,18 +2,22 @@ package JSON
 
 import "fmt"
 
-type String_T struct{ Value string }
+type String string
 
-func String(v string) *String_T {
-	return &String_T{Value: v}
-}
-func (v *String_T) ToString() string {
-	return fmt.Sprintf("\"%s\"", v.Value)
+func (v String) ToString() string {
+	return fmt.Sprintf("\"%s\"", v)
 }
 
-func AsString(v Value) (string, bool) {
-	if s, y := v.(*String_T); y {
-		return s.Value, true
+func GetString(v Value) string {
+	if s, y := v.(String); y {
+		return string(s)
+	}
+	return ""
+}
+
+func TryGetString(v Value) (string, bool) {
+	if s, y := v.(String); y {
+		return string(s), true
 	}
 	return "", false
 }
