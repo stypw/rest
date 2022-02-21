@@ -2,7 +2,7 @@ package orm
 
 import (
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 	"strings"
 )
 
@@ -20,117 +20,115 @@ $or,,$like,,$gt,,$gte,,$lt,,$lte,,$is,,$not,,$in,,$notin
 }
 **********************************************************/
 
-type jsonBoolean bool
-
-func (b jsonBoolean) toByte() byte {
+func chooseByte(b bool, t, f byte) byte {
 	if b {
-		return 1
-	} else {
-		return 0
+		return t
 	}
+	return f
 }
 
-func GetJsonValue(v JSON.Value) interface{} {
-	switch vv := v.(type) {
-	case JSON.Null:
-		return nil
-	case JSON.Number:
-		return vv
-	case JSON.String:
-		return vv
-	case JSON.Boolean:
-		return vv
-	default:
-		return nil
+func parseNotin(v gn.Element) (string, []interface{}, error) {
+	if v.GetType() != gn.ArrayType {
+		return "valueinvalid-notin", nil, nil
 	}
-}
+	array := v.ArrayEnumerator()
 
-func parseNotin(v JSON.Value) (string, []interface{}, error) {
-	if array, y := v.(JSON.Array); y {
-		if len(array) < 1 {
-			return "empty-notin", nil, nil
-		}
-		var strs []string = make([]string, 0)
-		var ponters []interface{} = make([]interface{}, 0)
-		for _, item := range array {
-			strs = append(strs, "?")
-			ponters = append(ponters, GetJsonValue(item))
-		}
-
-		return fmt.Sprintf(" not in (%s)", strings.Join(strs, ",")), ponters, nil
+	if len(array) < 1 {
+		return "empty-notin", nil, nil
 	}
-	return "valueinvalid-notin", nil, nil
-}
-
-func parseIn(v JSON.Value) (string, []interface{}, error) {
-	if array, y := v.(JSON.Array); y {
-		if len(array) < 1 {
-			return "empty-in", nil, nil
+	var strs []string = make([]string, 0)
+	var ponters []interface{} = make([]interface{}, 0)
+	for _, item := range array {
+		if !item.IsValue() {
+			continue
 		}
-		var strs []string = make([]string, 0)
-		var ponters []interface{} = make([]interface{}, 0)
-		for _, item := range array {
-			strs = append(strs, "?")
-			ponters = append(ponters, GetJsonValue(item))
-		}
-
-		return fmt.Sprintf(" in (%s)", strings.Join(strs, ",")), ponters, nil
+		strs = append(strs, "?")
+		ponters = append(ponters, item.RealValue())
 	}
-	return "valueinvalid-in", nil, nil
+
+	return fmt.Sprintf(" not in (%s)", strings.Join(strs, ",")), ponters, nil
 }
 
-func parseNot(v JSON.Value) (string, []interface{}, error) {
-	return " <> ?", []interface{}{GetJsonValue(v)}, nil
+func parseIn(v gn.Element) (string, []interface{}, error) {
+
+	if v.GetType() != gn.ArrayType {
+		return "valueinvalid-in", nil, nil
+	}
+	array := v.ArrayEnumerator()
+
+	if len(array) < 1 {
+		return "empty-in", nil, nil
+	}
+
+	if len(array) < 1 {
+		return "empty-in", nil, nil
+	}
+	var strs []string = make([]string, 0)
+	var ponters []interface{} = make([]interface{}, 0)
+	for _, item := range array {
+		if !item.IsValue() {
+			continue
+		}
+		strs = append(strs, "?")
+		ponters = append(ponters, item.RealValue())
+	}
+
+	return fmt.Sprintf(" in (%s)", strings.Join(strs, ",")), ponters, nil
+
 }
 
-func parseIs(v JSON.Value) (string, []interface{}, error) {
-	return " = ?", []interface{}{GetJsonValue(v)}, nil
+func parseNot(v gn.Element) (string, []interface{}, error) {
+	return " <> ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseLte(v JSON.Value) (string, []interface{}, error) {
-	return " <= ?", []interface{}{GetJsonValue(v)}, nil
+func parseIs(v gn.Element) (string, []interface{}, error) {
+	return " = ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseLt(v JSON.Value) (string, []interface{}, error) {
-	return " < ?", []interface{}{GetJsonValue(v)}, nil
+func parseLte(v gn.Element) (string, []interface{}, error) {
+	return " <= ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseGte(v JSON.Value) (string, []interface{}, error) {
-	return " >= ?", []interface{}{GetJsonValue(v)}, nil
+func parseLt(v gn.Element) (string, []interface{}, error) {
+	return " < ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseGt(v JSON.Value) (string, []interface{}, error) {
-	return " > ?", []interface{}{GetJsonValue(v)}, nil
+func parseGte(v gn.Element) (string, []interface{}, error) {
+	return " >= ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseLike(v JSON.Value) (string, []interface{}, error) {
-	return " like ?", []interface{}{GetJsonValue(v)}, nil
+func parseGt(v gn.Element) (string, []interface{}, error) {
+	return " > ?", []interface{}{v.RealValue()}, nil
 }
 
-func parseOr(v JSON.Value) (string, []interface{}, error) {
+func parseLike(v gn.Element) (string, []interface{}, error) {
+	return " like ?", []interface{}{v.RealValue()}, nil
+}
+
+func parseOr(v gn.Element) (string, []interface{}, error) {
 	var orList []string
 	valid := false
 	var params []interface{}
-	if array, ok := v.(JSON.Array); ok {
-		for _, item := range array {
-			if obj, y := item.(JSON.Object); y {
-				if strOr, ps, err := parseAnd(obj); err == nil {
-					orList = append(orList, strOr)
-					if len(ps) > 0 {
-						params = append(params, ps...)
-					}
-					valid = true
+	array := v.ArrayEnumerator()
+	for _, item := range array {
+		if item.GetType() == gn.ObjectType {
+			if strOr, ps, err := parseAnd(item); err == nil {
+				orList = append(orList, strOr)
+				if len(ps) > 0 {
+					params = append(params, ps...)
 				}
+				valid = true
 			}
 		}
 	}
+
 	if valid {
 		return fmt.Sprintf("(%s)", strings.Join(orList, " or ")), params, nil
 	}
 	return "", nil, fmt.Errorf("invalidor")
 }
 
-func parseDollar(k string, v JSON.Value) (string, []interface{}, error) {
+func parseDollar(k string, v gn.Element) (string, []interface{}, error) {
 	switch k {
 	case "$like":
 		return parseLike(v)
@@ -154,8 +152,8 @@ func parseDollar(k string, v JSON.Value) (string, []interface{}, error) {
 	return "", nil, fmt.Errorf("InvalidDollar")
 }
 
-func parseObject(obj JSON.Object) (string, []interface{}, error) {
-	for k, v := range obj {
+func parseObject(obj gn.Element) (string, []interface{}, error) {
+	for k, v := range obj.ObjectEnumerator() {
 		if express, ps, err := parseDollar(k, v); err == nil {
 			return express, ps, nil
 		}
@@ -163,10 +161,10 @@ func parseObject(obj JSON.Object) (string, []interface{}, error) {
 	return "", nil, fmt.Errorf("invalidvalue")
 }
 
-func parseAnd(where JSON.Object) (string, []interface{}, error) {
+func parseAnd(where gn.Element) (string, []interface{}, error) {
 	var ands []string
 	var params []interface{}
-	for k, v := range where {
+	for k, v := range where.ObjectEnumerator() {
 		if k == "" {
 			continue
 		}
@@ -184,25 +182,26 @@ func parseAnd(where JSON.Object) (string, []interface{}, error) {
 			}
 		}
 
-		switch val := v.(type) {
-		case JSON.Number:
+		switch v.GetType() {
+		case gn.NumberType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, val)
-		case JSON.String:
+			params = append(params, v.RealValue())
+		case gn.StringType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, val)
-		case JSON.Boolean:
+			params = append(params, v.RealValue())
+		case gn.BooleanType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, jsonBoolean(val).toByte())
-		case JSON.Object:
-			if express, ps, err := parseObject(val); err == nil {
+			val := v.GetBoolean()
+			params = append(params, chooseByte(val, 1, 0))
+		case gn.ObjectType:
+			if express, ps, err := parseObject(v); err == nil {
 				ands = append(ands, fmt.Sprintf("%s %s", k, express))
 				if len(ps) > 0 {
 					params = append(params, ps...)
 				}
 			}
 		}
-
 	}
+
 	return strings.Join(ands, " and "), params, nil
 }

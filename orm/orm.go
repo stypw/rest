@@ -2,17 +2,47 @@ package orm
 
 import (
 	"database/sql"
+	"rest/gn"
 )
 
 type field struct {
-	FieldType  string
-	FieldName  string
-	FieldValue interface{}
+	fieldType  string
+	fieldName  string
+	fieldValue interface{}
 }
 
-type Orm struct {
-	Db        *sql.DB
-	TableName string
+var ormDb *sql.DB = nil
+
+func SetDb(db *sql.DB) {
+	ormDb = db
+}
+
+type Orm interface {
+	SetDb(db *sql.DB)
+	SetTableName(tbName string)
+
+	Create(item gn.Element) (int64, error)
+	First(where, order gn.Element) (gn.Element, error)
+	List(where, order gn.Element) (gn.Element, error)
+	Page(where, order gn.Element, page, size int) (gn.Element, error)
+	Remove(where gn.Element) (int64, error)
+	Update(where gn.Element, data gn.Element) (int64, error)
+}
+
+func NewOrm(tbName string) Orm {
+	return &orm{db: ormDb, tableName: tbName}
+}
+
+type orm struct {
+	db        *sql.DB
+	tableName string
+}
+
+func (o *orm) SetDb(db *sql.DB) {
+	o.db = db
+}
+func (o *orm) SetTableName(tbName string) {
+	o.tableName = tbName
 }
 
 func makeFields(rows *sql.Rows) ([]*field, []interface{}, error) {
@@ -20,30 +50,30 @@ func makeFields(rows *sql.Rows) ([]*field, []interface{}, error) {
 		fields := make([]*field, 0)
 		pointers := make([]interface{}, 0)
 		for _, ct := range cts {
-			fd := &field{FieldType: ct.DatabaseTypeName(), FieldName: ct.Name()}
+			fd := &field{fieldType: ct.DatabaseTypeName(), fieldName: ct.Name()}
 			switch ct.DatabaseTypeName() {
 			case "INT", "BIGINT":
 				{
 					var v int64
-					fd.FieldValue = &v
+					fd.fieldValue = &v
 					pointers = append(pointers, &v)
 				}
 			case "VARCHAR", "TEXT", "NVARCHAR":
 				{
 					var v string
-					fd.FieldValue = &v
+					fd.fieldValue = &v
 					pointers = append(pointers, &v)
 				}
 			case "DECIMAL":
 				{
 					var v float64
-					fd.FieldValue = &v
+					fd.fieldValue = &v
 					pointers = append(pointers, &v)
 				}
 			case "BOOL":
 				{
 					var v bool
-					fd.FieldValue = &v
+					fd.fieldValue = &v
 					pointers = append(pointers, &v)
 				}
 			}

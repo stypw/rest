@@ -3,45 +3,46 @@ package orm
 import (
 	"errors"
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 )
 
-func readItem(fields []*field) (JSON.Object, error) {
-	var item JSON.Object = make(JSON.Object)
+func readItem(fields []*field) (gn.Element, error) {
+
+	var item gn.Element = gn.NewObject()
 	for _, f := range fields {
-		switch p := f.FieldValue.(type) {
+		switch p := f.fieldValue.(type) {
 		case *int64:
-			item[f.FieldName] = JSON.Number(float64(*p))
+			item.Set(f.fieldName, gn.NewNumber(float64(*p)))
 		case *string:
-			item[f.FieldName] = JSON.String(*p)
+			item.Set(f.fieldName, gn.NewString(*p))
 		case *float64:
-			item[f.FieldName] = JSON.Number(float64(*p))
+			item.Set(f.fieldName, gn.NewNumber(*p))
 		case *bool:
-			item[f.FieldName] = JSON.Boolean(*p)
+			item.Set(f.fieldName, gn.NewBoolean(*p))
 		}
 	}
 	return item, nil
 }
 
-func (orm *Orm) First(where, order JSON.Object) (JSON.Object, error) {
+func (o *orm) First(where, order gn.Element) (gn.Element, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
-		return nil, err
+		return gn.Null, err
 	}
 	if w == "" {
-		return nil, errors.New("where can not empty")
+		return gn.Null, errors.New("where can not empty")
 	}
-	o, err := parseOrder(order)
+	od, err := parseOrder(order)
 	if err != nil {
-		return nil, err
+		return gn.Null, err
 	}
 	orderString := ""
-	if o != "" {
-		orderString = " order by " + o
+	if od != "" {
+		orderString = " order by " + od
 	}
 
-	sqlText := fmt.Sprintf("select * from %s where %s %s limit 0,1;", orm.TableName, w, orderString)
-	if rows, err := orm.Db.Query(sqlText, vs...); err == nil {
+	sqlText := fmt.Sprintf("select * from %s where %s %s limit 0,1;", o.tableName, w, orderString)
+	if rows, err := o.db.Query(sqlText, vs...); err == nil {
 		defer rows.Close()
 		if fields, pointers, err := makeFields(rows); err == nil {
 			if rows.Next() {

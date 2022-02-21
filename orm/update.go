@@ -3,35 +3,43 @@ package orm
 import (
 	"errors"
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 	"strings"
 )
 
-func parseSet(item JSON.Object) ([]string, []interface{}, error) {
+func parseSet(item gn.Element) ([]string, []interface{}, error) {
 
 	var sets []string = make([]string, 0)
 	var values []interface{} = make([]interface{}, 0)
-
-	for key, child := range item {
-		switch ch := child.(type) {
-		case *JSON.Null:
+	if item.GetType() != gn.ObjectType {
+		return nil, nil, errors.New("unknowed data type")
+	}
+	for key, child := range item.ObjectEnumerator() {
+		switch child.GetType() {
+		case gn.NullType:
 			{
-				sets = append(sets, fmt.Sprintf("%s = ?"), key)
+				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, nil)
 			}
-		case *JSON.Number:
+		case gn.NumberType:
 			{
-				sets = append(sets, fmt.Sprintf("%s = ?"), key)
+				//ch, _ := gn.ToNumber(child)
+				ch := child.GetNumber()
+				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
 			}
-		case *JSON.String:
+		case gn.StringType:
 			{
-				sets = append(sets, fmt.Sprintf("%s = ?"), key)
+				// ch, _ := gn.ToString(child)
+				ch := child.GetString()
+				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
 			}
-		case *JSON.Boolean:
+		case gn.BooleanType:
 			{
-				sets = append(sets, fmt.Sprintf("%s = ?"), key)
+				// ch, _ := gn.ToBoolean(child)
+				ch := child.GetBoolean()
+				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
 			}
 		default:
@@ -41,29 +49,29 @@ func parseSet(item JSON.Object) ([]string, []interface{}, error) {
 	return sets, values, nil
 }
 
-func (orm *Orm) Update(where JSON.Object, data JSON.Object) (JSON.Number, error) {
+func (o *orm) Update(where gn.Element, data gn.Element) (int64, error) {
 
 	w, vs, err := parseAnd(where)
 	if err != nil {
-		return JSON.Number(0), err
+		return 0, err
 	}
 	if w == "" {
-		return JSON.Number(0), errors.New("where can not empty")
+		return 0, errors.New("where can not empty")
 	}
 	sets, vals, err := parseSet(data)
 	if err != nil {
-		return JSON.Number(0), err
+		return 0, err
 	}
 
-	sqlText := fmt.Sprintf("update %s set %s where %s;", orm.TableName, strings.Join(sets, ","), w)
+	sqlText := fmt.Sprintf("update %s set %s where %s;", o.tableName, strings.Join(sets, ","), w)
 	values := append(vals, vs...)
-	ret, err := orm.Db.Exec(sqlText, values...)
+	ret, err := o.db.Exec(sqlText, values...)
 	if err != nil {
-		return JSON.Number(0), err
+		return 0, err
 	}
 	id, err := ret.RowsAffected()
 	if err != nil {
-		return JSON.Number(0), nil
+		return 0, nil
 	}
-	return JSON.Number(float64(id)), nil
+	return id, nil
 }

@@ -3,23 +3,24 @@ package orm
 import (
 	"errors"
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 	"strings"
 )
 
-func parseOrder(order JSON.Value) (string, error) {
+func parseOrder(order gn.Element) (string, error) {
 	if nil == order {
 		return "", nil
 	}
 	orders := make([]string, 0)
-	switch vd := order.(type) {
-	case JSON.Object:
+	switch order.GetType() {
+	case gn.ObjectType:
 		{
-			for key, child := range vd {
-				switch ch := child.(type) {
-				case JSON.String:
+			for key, child := range order.ObjectEnumerator() {
+				switch child.GetType() {
+				case gn.StringType:
 					{
-						var od = strings.ToLower(strings.Trim(string(ch), ""))
+						ch := child.GetString()
+						var od = strings.ToLower(strings.Trim(ch, ""))
 						if od == "asc" || od == "desc" {
 							orders = append(orders, fmt.Sprintf("%s %s", key, od))
 							orders = append(orders, fmt.Sprintf("%s %s", key, od))
@@ -28,8 +29,9 @@ func parseOrder(order JSON.Value) (string, error) {
 							return "", errors.New("order fmt error")
 						}
 					}
-				case JSON.Number:
+				case gn.NumberType:
 					{
+						ch := child.GetNumber()
 						if ch > 0 {
 							orders = append(orders, key+" asc")
 						} else {
@@ -37,8 +39,9 @@ func parseOrder(order JSON.Value) (string, error) {
 						}
 
 					}
-				case JSON.Boolean:
+				case gn.BooleanType:
 					{
+						ch := child.GetBoolean()
 						if ch {
 							orders = append(orders, key+" asc")
 						} else {
@@ -48,17 +51,16 @@ func parseOrder(order JSON.Value) (string, error) {
 				}
 			}
 		}
-	case JSON.Array:
+	case gn.ArrayType:
 		{
-			for _, item := range vd {
-				if i, y := item.(JSON.String); !y {
+			for _, item := range order.ArrayEnumerator() {
+				if item.GetType() != gn.StringType {
 					return "", errors.New("order fmt error")
-				} else {
-					orders = append(orders, string(i))
 				}
+				orders = append(orders, item.GetString())
 			}
 		}
-	case JSON.Null:
+	case gn.NullType:
 		{
 			return "", nil
 		}

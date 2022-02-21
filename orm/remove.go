@@ -3,26 +3,26 @@ package orm
 import (
 	"errors"
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 )
 
-func (orm *Orm) Remove(where JSON.Object) (JSON.Number, error) {
+func (o *orm) Remove(where gn.Element) (int64, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
-		return JSON.Number(0), err
+		return 0, err
 	}
 	if w == "" {
-		return JSON.Number(0), errors.New("where can not empty")
+		return 0, errors.New("where can not empty")
 	}
 
-	sqlText := fmt.Sprintf("delete from %s where %s;", orm.TableName, w)
-	ret, err := orm.Db.Exec(sqlText, vs...)
+	sqlText := fmt.Sprintf("delete from %s where %s;", o.tableName, w)
+	ret, err := o.db.Exec(sqlText, vs...)
 	if err != nil {
-		return JSON.Number(0), err
+		return 0, err
 	}
 	id, err := ret.RowsAffected()
 	if err != nil {
-		return JSON.Number(0), nil
+		return 0, nil
 	}
-	return JSON.Number(float64(id)), nil
+	return id, nil
 }

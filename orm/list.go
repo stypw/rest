@@ -3,10 +3,10 @@ package orm
 import (
 	"errors"
 	"fmt"
-	JSON "rest/json"
+	"rest/gn"
 )
 
-func (orm *Orm) List(where, order JSON.Object) (JSON.Array, error) {
+func (o *orm) List(where, order gn.Element) (gn.Element, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
 		return nil, err
@@ -14,27 +14,27 @@ func (orm *Orm) List(where, order JSON.Object) (JSON.Array, error) {
 	if w == "" {
 		return nil, errors.New("where can not empty")
 	}
-	o, err := parseOrder(order)
+	od, err := parseOrder(order)
 	if err != nil {
 		return nil, err
 	}
 	orderString := ""
-	if o != "" {
-		orderString = " order by " + o
+	if od != "" {
+		orderString = " order by " + od
 	}
 
-	sqlText := fmt.Sprintf("select * from %s where %s %s;", orm.TableName, w, orderString)
-	if rows, err := orm.Db.Query(sqlText, vs...); err == nil {
+	sqlText := fmt.Sprintf("select * from %s where %s %s;", o.tableName, w, orderString)
+	if rows, err := o.db.Query(sqlText, vs...); err == nil {
 		defer rows.Close()
 		if fields, pointers, err := makeFields(rows); err == nil {
-			array := make(JSON.Array, 0)
+			array := gn.NewArray()
 			for rows.Next() {
 				if err := rows.Scan(pointers...); err == nil {
 					item, err := readItem(fields)
 					if err != nil {
 						return nil, err
 					}
-					array = append(array, item)
+					array.Push(item)
 				} else {
 					return nil, err
 				}
