@@ -30,11 +30,11 @@ type Element interface {
 	GetString() string
 	TryGetString() (string, bool)
 
-	//object才能正确返回，其它类型，或者k没有匹配，返回undefined
+	//返回object[k],object类型且k匹配才能正确返回，其它返回undefined
 	GetProperty(k string) Element
 	TryGetProperty(k string) (Element, bool)
 
-	//array才能正确返回，其它类型，或者idx范围错误，返回undefined
+	//返回array[idx],array类型且idx在索引范围内才能正确返回，其它返回undefined
 	GetElement(idx int) Element
 	TryGetElement(idx int) (Element, bool)
 

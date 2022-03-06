@@ -39,5 +39,6 @@ func doRouter(record *routerRecord) {
 func Start() {
 	for _, r := range routers {
 		doRouter(r)
+		fmt.Println(r.pattern)
 	}
 }
