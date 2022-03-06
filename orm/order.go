@@ -3,21 +3,21 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 	"strings"
 )
 
-func parseOrder(order gn.Element) (string, error) {
+func parseOrder(order kv.Element) (string, error) {
 	if nil == order {
 		return "", nil
 	}
 	orders := make([]string, 0)
 	switch order.GetType() {
-	case gn.ObjectType:
+	case kv.ObjectType:
 		{
 			for key, child := range order.ObjectEnumerator() {
 				switch child.GetType() {
-				case gn.StringType:
+				case kv.StringType:
 					{
 						ch := child.GetString()
 						var od = strings.ToLower(strings.Trim(ch, ""))
@@ -29,7 +29,7 @@ func parseOrder(order gn.Element) (string, error) {
 							return "", errors.New("order fmt error")
 						}
 					}
-				case gn.NumberType:
+				case kv.NumberType:
 					{
 						ch := child.GetNumber()
 						if ch > 0 {
@@ -39,7 +39,7 @@ func parseOrder(order gn.Element) (string, error) {
 						}
 
 					}
-				case gn.BooleanType:
+				case kv.BooleanType:
 					{
 						ch := child.GetBoolean()
 						if ch {
@@ -51,16 +51,16 @@ func parseOrder(order gn.Element) (string, error) {
 				}
 			}
 		}
-	case gn.ArrayType:
+	case kv.ArrayType:
 		{
 			for _, item := range order.ArrayEnumerator() {
-				if item.GetType() != gn.StringType {
+				if item.GetType() != kv.StringType {
 					return "", errors.New("order fmt error")
 				}
 				orders = append(orders, item.GetString())
 			}
 		}
-	case gn.NullType:
+	case kv.NullType:
 		{
 			return "", nil
 		}

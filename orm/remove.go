@@ -3,10 +3,10 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 )
 
-func (o *orm) Remove(where gn.Element) (int64, error) {
+func (o *orm) Remove(where kv.Element) (int64, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
 		return 0, err

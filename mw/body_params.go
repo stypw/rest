@@ -3,11 +3,11 @@ package mw
 import (
 	"net/http"
 	"rest/df"
-	"rest/gn"
+	"rest/kv"
 )
 
 var JsonBodyMiddleware = NewMiddleware(func(r *http.Request, msg *Message, extra Extra, next Next) {
-	body := gn.FromStream(r.Body)
+	body := kv.FromStream(r.Body)
 	if body == nil {
 		msg.Code = df.HTTP_STATUS_PARAM_ERROR
 		msg.Msg = "body为空"

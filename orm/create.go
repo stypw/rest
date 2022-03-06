@@ -3,39 +3,39 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 	"strings"
 )
 
-func parseCreate(item gn.Element) ([]string, []string, []interface{}, error) {
+func parseCreate(item kv.Element) ([]string, []string, []interface{}, error) {
 
 	var fields []string = make([]string, 0)
 	var marks []string = make([]string, 0)
 	var values []interface{} = make([]interface{}, 0)
-	if item.GetType() != gn.ObjectType {
+	if item.GetType() != kv.ObjectType {
 		return nil, nil, nil, errors.New("unknowed data type")
 	}
 	for key, child := range item.ObjectEnumerator() {
 		switch child.GetType() {
-		case gn.NullType:
+		case kv.NullType:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
 				values = append(values, nil)
 			}
-		case gn.NumberType:
+		case kv.NumberType:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
 				values = append(values, child.GetNumber())
 			}
-		case gn.StringType:
+		case kv.StringType:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
 				values = append(values, child.GetString())
 			}
-		case gn.BooleanType:
+		case kv.BooleanType:
 			{
 				fields = append(fields, key)
 				marks = append(marks, "?")
@@ -48,7 +48,7 @@ func parseCreate(item gn.Element) ([]string, []string, []interface{}, error) {
 	return fields, marks, values, nil
 }
 
-func (o *orm) Create(item gn.Element) (int64, error) {
+func (o *orm) Create(item kv.Element) (int64, error) {
 	if item == nil {
 		return 0, errors.New("item data can not empty")
 	}

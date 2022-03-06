@@ -3,38 +3,38 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 )
 
-func readItem(fields []*field) (gn.Element, error) {
+func readItem(fields []*field) (kv.Element, error) {
 
-	var item gn.Element = gn.NewObject()
+	var item kv.Element = kv.NewObject()
 	for _, f := range fields {
 		switch p := f.fieldValue.(type) {
 		case *int64:
-			item.Set(f.fieldName, gn.NewNumber(float64(*p)))
+			item.Set(f.fieldName, kv.NewNumber(float64(*p)))
 		case *string:
-			item.Set(f.fieldName, gn.NewString(*p))
+			item.Set(f.fieldName, kv.NewString(*p))
 		case *float64:
-			item.Set(f.fieldName, gn.NewNumber(*p))
+			item.Set(f.fieldName, kv.NewNumber(*p))
 		case *bool:
-			item.Set(f.fieldName, gn.NewBoolean(*p))
+			item.Set(f.fieldName, kv.NewBoolean(*p))
 		}
 	}
 	return item, nil
 }
 
-func (o *orm) First(where, order gn.Element) (gn.Element, error) {
+func (o *orm) First(where, order kv.Element) (kv.Element, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
-		return gn.Null, err
+		return kv.Null, err
 	}
 	if w == "" {
-		return gn.Null, errors.New("where can not empty")
+		return kv.Null, errors.New("where can not empty")
 	}
 	od, err := parseOrder(order)
 	if err != nil {
-		return gn.Null, err
+		return kv.Null, err
 	}
 	orderString := ""
 	if od != "" {

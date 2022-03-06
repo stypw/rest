@@ -2,7 +2,7 @@ package orm
 
 import (
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 	"strings"
 )
 
@@ -27,8 +27,8 @@ func chooseByte(b bool, t, f byte) byte {
 	return f
 }
 
-func parseNotin(v gn.Element) (string, []interface{}, error) {
-	if v.GetType() != gn.ArrayType {
+func parseNotin(v kv.Element) (string, []interface{}, error) {
+	if v.GetType() != kv.ArrayType {
 		return "valueinvalid-notin", nil, nil
 	}
 	array := v.ArrayEnumerator()
@@ -43,15 +43,15 @@ func parseNotin(v gn.Element) (string, []interface{}, error) {
 			continue
 		}
 		strs = append(strs, "?")
-		ponters = append(ponters, item.RealValue())
+		ponters = append(ponters, item.GetValue())
 	}
 
 	return fmt.Sprintf(" not in (%s)", strings.Join(strs, ",")), ponters, nil
 }
 
-func parseIn(v gn.Element) (string, []interface{}, error) {
+func parseIn(v kv.Element) (string, []interface{}, error) {
 
-	if v.GetType() != gn.ArrayType {
+	if v.GetType() != kv.ArrayType {
 		return "valueinvalid-in", nil, nil
 	}
 	array := v.ArrayEnumerator()
@@ -70,48 +70,48 @@ func parseIn(v gn.Element) (string, []interface{}, error) {
 			continue
 		}
 		strs = append(strs, "?")
-		ponters = append(ponters, item.RealValue())
+		ponters = append(ponters, item.GetValue())
 	}
 
 	return fmt.Sprintf(" in (%s)", strings.Join(strs, ",")), ponters, nil
 
 }
 
-func parseNot(v gn.Element) (string, []interface{}, error) {
-	return " <> ?", []interface{}{v.RealValue()}, nil
+func parseNot(v kv.Element) (string, []interface{}, error) {
+	return " <> ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseIs(v gn.Element) (string, []interface{}, error) {
-	return " = ?", []interface{}{v.RealValue()}, nil
+func parseIs(v kv.Element) (string, []interface{}, error) {
+	return " = ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseLte(v gn.Element) (string, []interface{}, error) {
-	return " <= ?", []interface{}{v.RealValue()}, nil
+func parseLte(v kv.Element) (string, []interface{}, error) {
+	return " <= ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseLt(v gn.Element) (string, []interface{}, error) {
-	return " < ?", []interface{}{v.RealValue()}, nil
+func parseLt(v kv.Element) (string, []interface{}, error) {
+	return " < ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseGte(v gn.Element) (string, []interface{}, error) {
-	return " >= ?", []interface{}{v.RealValue()}, nil
+func parseGte(v kv.Element) (string, []interface{}, error) {
+	return " >= ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseGt(v gn.Element) (string, []interface{}, error) {
-	return " > ?", []interface{}{v.RealValue()}, nil
+func parseGt(v kv.Element) (string, []interface{}, error) {
+	return " > ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseLike(v gn.Element) (string, []interface{}, error) {
-	return " like ?", []interface{}{v.RealValue()}, nil
+func parseLike(v kv.Element) (string, []interface{}, error) {
+	return " like ?", []interface{}{v.GetValue()}, nil
 }
 
-func parseOr(v gn.Element) (string, []interface{}, error) {
+func parseOr(v kv.Element) (string, []interface{}, error) {
 	var orList []string
 	valid := false
 	var params []interface{}
 	array := v.ArrayEnumerator()
 	for _, item := range array {
-		if item.GetType() == gn.ObjectType {
+		if item.GetType() == kv.ObjectType {
 			if strOr, ps, err := parseAnd(item); err == nil {
 				orList = append(orList, strOr)
 				if len(ps) > 0 {
@@ -128,7 +128,7 @@ func parseOr(v gn.Element) (string, []interface{}, error) {
 	return "", nil, fmt.Errorf("invalidor")
 }
 
-func parseDollar(k string, v gn.Element) (string, []interface{}, error) {
+func parseDollar(k string, v kv.Element) (string, []interface{}, error) {
 	switch k {
 	case "$like":
 		return parseLike(v)
@@ -152,7 +152,7 @@ func parseDollar(k string, v gn.Element) (string, []interface{}, error) {
 	return "", nil, fmt.Errorf("InvalidDollar")
 }
 
-func parseObject(obj gn.Element) (string, []interface{}, error) {
+func parseObject(obj kv.Element) (string, []interface{}, error) {
 	for k, v := range obj.ObjectEnumerator() {
 		if express, ps, err := parseDollar(k, v); err == nil {
 			return express, ps, nil
@@ -161,7 +161,7 @@ func parseObject(obj gn.Element) (string, []interface{}, error) {
 	return "", nil, fmt.Errorf("invalidvalue")
 }
 
-func parseAnd(where gn.Element) (string, []interface{}, error) {
+func parseAnd(where kv.Element) (string, []interface{}, error) {
 	var ands []string
 	var params []interface{}
 	for k, v := range where.ObjectEnumerator() {
@@ -183,17 +183,17 @@ func parseAnd(where gn.Element) (string, []interface{}, error) {
 		}
 
 		switch v.GetType() {
-		case gn.NumberType:
+		case kv.NumberType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, v.RealValue())
-		case gn.StringType:
+			params = append(params, v.GetValue())
+		case kv.StringType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
-			params = append(params, v.RealValue())
-		case gn.BooleanType:
+			params = append(params, v.GetValue())
+		case kv.BooleanType:
 			ands = append(ands, fmt.Sprintf("%s = ?", k))
 			val := v.GetBoolean()
 			params = append(params, chooseByte(val, 1, 0))
-		case gn.ObjectType:
+		case kv.ObjectType:
 			if express, ps, err := parseObject(v); err == nil {
 				ands = append(ands, fmt.Sprintf("%s %s", k, express))
 				if len(ps) > 0 {

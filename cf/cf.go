@@ -2,29 +2,29 @@ package cf
 
 import (
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 	"sync"
 )
 
 var lock sync.Mutex
-var cf gn.Element = gn.Null
+var cf kv.Element = kv.Null
 
-func GetConfig() gn.Element {
-	if cf == gn.Null {
+func GetConfig() kv.Element {
+	if cf == kv.Null {
 		lock.Lock()
-		if cf == gn.Null {
-			cf = gn.FromFile("./config.json")
+		if cf == kv.Null {
+			cf = kv.FromFile("./config.json")
 		}
-		if cf == gn.Null {
-			cf = gn.FromFile("./app.json")
+		if cf == kv.Null {
+			cf = kv.FromFile("./app.json")
 		}
-		if cf == gn.Null {
-			cf = gn.FromFile("./application.json")
+		if cf == kv.Null {
+			cf = kv.FromFile("./application.json")
 		}
-		if cf == gn.Null {
-			cf = gn.FromFile("./cf.json")
+		if cf == kv.Null {
+			cf = kv.FromFile("./cf.json")
 		}
-		if cf == gn.Null {
+		if cf == kv.Null {
 			fmt.Println("could not find configfile:[config.josn | app.json | application.json | cf.json]")
 		}
 		lock.Unlock()

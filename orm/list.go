@@ -3,10 +3,10 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 )
 
-func (o *orm) List(where, order gn.Element) (gn.Element, error) {
+func (o *orm) List(where, order kv.Element) (kv.Element, error) {
 	w, vs, err := parseAnd(where)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (o *orm) List(where, order gn.Element) (gn.Element, error) {
 	if rows, err := o.db.Query(sqlText, vs...); err == nil {
 		defer rows.Close()
 		if fields, pointers, err := makeFields(rows); err == nil {
-			array := gn.NewArray()
+			array := kv.NewArray()
 			for rows.Next() {
 				if err := rows.Scan(pointers...); err == nil {
 					item, err := readItem(fields)

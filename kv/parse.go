@@ -1,4 +1,4 @@
-package gn
+package kv
 
 import (
 	"encoding/json"
@@ -143,10 +143,10 @@ func parse(dc *json.Decoder) Element {
 
 	t, err := dc.Token()
 	if err == io.EOF {
-		return null
+		return undefined
 	}
 	if err != nil {
-		return null
+		return undefined
 	}
 	switch tv := t.(type) {
 	case json.Delim:
@@ -163,7 +163,7 @@ func parse(dc *json.Decoder) Element {
 			}
 		}
 	}
-	return null
+	return undefined
 }
 
 func FromStream(stream io.Reader) Element {
@@ -178,7 +178,7 @@ func FromString(input string) Element {
 func FromFile(path string) Element {
 	ct, er := ioutil.ReadFile("./config.json")
 	if er != nil {
-		return null
+		return undefined
 	}
 	return FromString(string(ct))
 }

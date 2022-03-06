@@ -3,41 +3,41 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/gn"
+	"rest/kv"
 	"strings"
 )
 
-func parseSet(item gn.Element) ([]string, []interface{}, error) {
+func parseSet(item kv.Element) ([]string, []interface{}, error) {
 
 	var sets []string = make([]string, 0)
 	var values []interface{} = make([]interface{}, 0)
-	if item.GetType() != gn.ObjectType {
+	if item.GetType() != kv.ObjectType {
 		return nil, nil, errors.New("unknowed data type")
 	}
 	for key, child := range item.ObjectEnumerator() {
 		switch child.GetType() {
-		case gn.NullType:
+		case kv.NullType:
 			{
 				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, nil)
 			}
-		case gn.NumberType:
+		case kv.NumberType:
 			{
-				//ch, _ := gn.ToNumber(child)
+				//ch, _ := kv.ToNumber(child)
 				ch := child.GetNumber()
 				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
 			}
-		case gn.StringType:
+		case kv.StringType:
 			{
-				// ch, _ := gn.ToString(child)
+				// ch, _ := kv.ToString(child)
 				ch := child.GetString()
 				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
 			}
-		case gn.BooleanType:
+		case kv.BooleanType:
 			{
-				// ch, _ := gn.ToBoolean(child)
+				// ch, _ := kv.ToBoolean(child)
 				ch := child.GetBoolean()
 				sets = append(sets, fmt.Sprintf("%s = ?", key))
 				values = append(values, ch)
@@ -49,7 +49,7 @@ func parseSet(item gn.Element) ([]string, []interface{}, error) {
 	return sets, values, nil
 }
 
-func (o *orm) Update(where gn.Element, data gn.Element) (int64, error) {
+func (o *orm) Update(where kv.Element, data kv.Element) (int64, error) {
 
 	w, vs, err := parseAnd(where)
 	if err != nil {

@@ -2,7 +2,7 @@ package orm
 
 import (
 	"database/sql"
-	"rest/gn"
+	"rest/kv"
 )
 
 type field struct {
@@ -21,12 +21,12 @@ type Orm interface {
 	SetDb(db *sql.DB)
 	SetTableName(tbName string)
 
-	Create(item gn.Element) (int64, error)
-	First(where, order gn.Element) (gn.Element, error)
-	List(where, order gn.Element) (gn.Element, error)
-	Page(where, order gn.Element, page, size int) (gn.Element, error)
-	Remove(where gn.Element) (int64, error)
-	Update(where gn.Element, data gn.Element) (int64, error)
+	Create(item kv.Element) (int64, error)
+	First(where, order kv.Element) (kv.Element, error)
+	List(where, order kv.Element) (kv.Element, error)
+	Page(where, order kv.Element, page, size int) (kv.Element, error)
+	Remove(where kv.Element) (int64, error)
+	Update(where kv.Element, data kv.Element) (int64, error)
 }
 
 func NewOrm(tbName string) Orm {
