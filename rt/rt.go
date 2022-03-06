@@ -3,8 +3,9 @@ package rt
 import (
 	"fmt"
 	"net/http"
-	"rest/mw"
 	"time"
+
+	"github.com/stypw/rest/mw"
 )
 
 type Router interface {

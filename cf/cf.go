@@ -2,8 +2,9 @@ package cf
 
 import (
 	"fmt"
-	"rest/kv"
 	"sync"
+
+	"github.com/stypw/rest/kv"
 )
 
 var lock sync.Mutex

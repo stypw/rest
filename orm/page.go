@@ -3,7 +3,8 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/kv"
+
+	"github.com/stypw/rest/kv"
 )
 
 func (o *orm) Page(where, order kv.Element, page, size int) (kv.Element, error) {

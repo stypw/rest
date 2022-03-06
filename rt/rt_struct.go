@@ -2,7 +2,8 @@ package rt
 
 import (
 	"net/http"
-	"rest/mw"
+
+	"github.com/stypw/rest/mw"
 )
 
 type router struct {

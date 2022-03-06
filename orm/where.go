@@ -2,8 +2,9 @@ package orm
 
 import (
 	"fmt"
-	"rest/kv"
 	"strings"
+
+	"github.com/stypw/rest/kv"
 )
 
 /**********************************************************

@@ -3,7 +3,8 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/kv"
+
+	"github.com/stypw/rest/kv"
 )
 
 func (o *orm) Remove(where kv.Element) (int64, error) {

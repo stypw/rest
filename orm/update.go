@@ -3,8 +3,9 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/kv"
 	"strings"
+
+	"github.com/stypw/rest/kv"
 )
 
 func parseSet(item kv.Element) ([]string, []interface{}, error) {

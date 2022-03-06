@@ -2,8 +2,9 @@ package mw
 
 import (
 	"net/http"
-	"rest/df"
-	"rest/kv"
+
+	"github.com/stypw/rest/df"
+	"github.com/stypw/rest/kv"
 )
 
 var JsonBodyMiddleware = NewMiddleware(func(r *http.Request, msg *Message, extra Extra, next Next) {

@@ -2,7 +2,8 @@ package orm
 
 import (
 	"database/sql"
-	"rest/kv"
+
+	"github.com/stypw/rest/kv"
 )
 
 type field struct {

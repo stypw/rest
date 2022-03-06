@@ -3,8 +3,9 @@ package orm
 import (
 	"errors"
 	"fmt"
-	"rest/kv"
 	"strings"
+
+	"github.com/stypw/rest/kv"
 )
 
 func parseCreate(item kv.Element) ([]string, []string, []interface{}, error) {
